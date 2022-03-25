@@ -40,5 +40,27 @@ def movies():
         return jsonify(movies_list), 201
 
 
+@app.route("/movie/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+def single_movie(id):
+    if request.method == 'GET':
+        for movie in movies_list:
+            if movie['id'] == id:
+                return jsonify(movie)
+    if request.method == 'PUT':
+        for movie in movies_list:
+            if movie['id'] == id:
+                movie['title'] = request.form['title']
+                updated_movie = {
+                    'id': id,
+                    'title': movie['title']
+                }
+                return jsonify(updated_movie)
+    if request.method == 'DELETE':
+        for index, movie in enumerate(movies_list):
+            if movie['id'] == id:
+                movies_list.pop(index)
+                return jsonify(movies_list)
+
+
 if __name__ == '__main__':
     app.run()
