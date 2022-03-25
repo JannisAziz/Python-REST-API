@@ -41,5 +41,44 @@ def movies():
         return f"Movie with the id: {cursor.lastrowid} created successfully", 201
 
 
+@app.route("/movie/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+def single_movie(id):
+    conn = db_connection()
+    cursor = conn.cursor()
+    movie = None
+
+    if request.method == 'GET':
+        cursor.execute("SELECT * FROM movie WHERE id=?", [id])
+        rows = cursor.fetchall()
+        for r in rows:
+            movie = r
+        if movie is not None:
+            return jsonify(movie), 200
+        else:
+            return "Something wrong", 404
+
+    if request.method == 'PUT':
+        sql = """UPDATE movie 
+        		SET title=? 
+          		WHERE id=? """
+
+        title = request.form["title"]
+
+        updated_movie = {
+            'id': id,
+            'title': title
+        }
+
+        conn.execute(sql, [title, id])
+        conn.commit()
+        return jsonify(updated_movie)
+
+    if request.method == 'DELETE':
+        sql = """ DELETE FROM movie WHERE id=? """
+        conn.execute(sql, [id])
+        conn.commit()
+        return "The book with id: {} has been deleted.".format(id), 200
+
+
 if __name__ == '__main__':
     app.run()
